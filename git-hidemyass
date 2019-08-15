@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+usage() {
+    cat <<EOM
+    Usage:
+    $(basename "$0")          To hide your A\$\$ for next commits
+    $(basename "$0") reset    To restore your original identity
+
+EOM
+    exit 0
+}
+
+createBackup() {
+    if [ ! -f ~/.githidemyass_backup ]; then
+        git config user.name > ~/.githidemyass_backup 
+        git config user.email >> ~/.githidemyass_backup 
+    fi
+}
+
+restoreBackup() {
+    ORIGINAL_NAME=$(awk 'NR==1 {print; exit}' ~/.githidemyass_backup)
+    ORIGINAL_EMAIL=$(awk 'NR==2 {print; exit}' ~/.githidemyass_backup)
+    git config --replace-all user.name "$ORIGINAL_NAME"
+    git config --replace-all user.email "$ORIGINAL_EMAIL"
+    echo "$ORIGINAL_EMAIL"
+    echo "$ORIGINAL_NAME"
+    rm -f ~/.githidemyass_backup 
+}
+
+hideAss(){
+
+    REAL_NAME=$(git config user.name)
+    REAL_EMAIL=$(git config user.email)
+    COUNTER=$(git log --pretty="%an %ae" | sort| uniq | wc -l)
+
+    ROW=$(( ( RANDOM % COUNTER )  + 1 ))
+    LINE=$(git log --pretty="%an %ae" | sort | uniq | awk -v row=$ROW 'FNR==row')
+    USERNAME=$(echo "$LINE" | rev | cut -d" " -f2-6 | rev)
+    EMAIL=$(echo "$LINE" | grep -E -o "\b[a-zA-Z0-9.-]+@[a-zA-Z0-9.-]+.[a-zA-Z0-9.-]+\b")
+
+    [ -z "$USERNAME" ] && USERNAME="Arno Nyme"
+    [ -z "$EMAIL" ] && EMAIL="arno.nyme@n0where.hma"
+    
+
+
+    git config user.name "$USERNAME"
+    git config user.email "$EMAIL"
+}
+
+
+
+[ $# -gt 1 ] && { usage; }
+[ $# -eq 0 ] && {
+  createBackup;
+  echo "JUST HIDE YOUR (_!_) "
+  REAL_NAME=$(git config user.name)
+  REAL_EMAIL=$(git config user.email)
+
+  hideAss & PID=$! 
+
+  echo "THIS MAY TAKE A WHILE..."
+  printf "["
+  # While process is running...
+  while kill -0 $PID 2> /dev/null; do 
+    printf  "▓"
+    sleep 0.2
+  done
+  printf "] DONE!\n"
+  NEW_NAME=$(git config user.name)
+  NEW_EMAIL=$(git config user.email)
+
+  echo -e "\nOld Identity: \n $REAL_NAME \n $REAL_EMAIL"
+  echo -e "\nNew Identity; \n $NEW_NAME \n $NEW_EMAIL"
+
+  
+}
+
+[ $# -eq 1 ] && { 
+    if [ "$1" == "reset" ]; then
+        restoreBackup;
+    else
+        usage;
+    fi
+}
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,5 @@
+---
+language: bash
+before_script:
+  - "sudo curl -o /usr/local/bin/shunit2 https://raw.githubusercontent.com/kward/shunit2/master/shunit2"
+script: ./testsuite.sh
