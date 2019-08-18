@@ -21,6 +21,7 @@ restoreBackup() {
     ORIGINAL_EMAIL=$(awk 'NR==2 {print; exit}' ~/.githidemyass_backup)
     git config --replace-all user.name "$ORIGINAL_NAME"
     git config --replace-all user.email "$ORIGINAL_EMAIL"
+    echo -e "Identity switched back to: \n"
     echo "$ORIGINAL_EMAIL"
     echo "$ORIGINAL_NAME"
     rm -f ~/.githidemyass_backup 
